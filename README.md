@@ -61,9 +61,9 @@ Grafana automatically moves folders and dashboards to Unified Storage. This
 image explicitly enables the folder and dashboard migrations so both resource
 kinds are registered consistently, limits the SQLite migration cache to 32 MiB
 instead of its 1 GB default, and uses the Parquet buffer to avoid SQLite lock
-contention. The ViaTrack dashboard is provisioned in `General` and configured as
-the home dashboard, so loading it does not depend on a separately persisted
-folder resource.
+contention. The ViaTrack dashboard is configured as the home dashboard and is
+provisioned inside the `ViaTrack` folder with the stable UID `viatrack`, so it is
+also available through Grafana's normal Dashboards browser.
 
 Prometheus scrapes Grafana once per minute over Railway's private network. Use
 `process_resident_memory_bytes{job="grafana"}` for the physical memory held by
