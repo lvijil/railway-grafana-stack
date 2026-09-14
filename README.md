@@ -41,9 +41,16 @@ remain JSON fields or Loki structured metadata; they are intentionally not metri
 labels because their cardinality grows without bound.
 
 The ViaTrack dashboard refreshes once per minute and caps its log panel to reduce
-query pressure. For a Grafana service limited to 512 MiB in Railway, set
-`GOMEMLIMIT=384MiB`; keep the value below the container memory limit. Remove the
-template's `GF_INSTALL_PLUGINS` value when those optional plugins are unused.
+query pressure. The Grafana and Tempo images default to `GOMEMLIMIT=320MiB`,
+`GOGC=75`, and prompt release of unused Go memory. Railway environment variables
+override these image defaults, so remove an existing `GOMEMLIMIT` when you want
+the repository profile to apply. Also remove the template's `GF_INSTALL_PLUGINS`
+value when those optional plugins are unused.
+
+Tempo uses only OTLP/HTTP, which is the protocol exposed by the telemetry gateway.
+Its small-instance profile limits search concurrency and live block size, disables
+per-span debug logging and anonymous usage reporting, reduces the default backend
+worker queue and search buffers, and keeps Tempo's standard trace retention unchanged.
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/8TLSQD?referralCode=IFlm92)
 
