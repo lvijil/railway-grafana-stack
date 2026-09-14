@@ -41,9 +41,9 @@ remain JSON fields or Loki structured metadata; they are intentionally not metri
 labels because their cardinality grows without bound.
 
 The ViaTrack dashboard refreshes once per minute and caps its log panel to reduce
-query pressure. Grafana is pinned to the supported `13.2.1` OSS image and uses a
-small-instance profile with `GOMEMLIMIT=256MiB`,
-`GOGC=50`, one Go scheduler thread, bounded query concurrency and no alerting,
+query pressure. Grafana is pinned to the supported `13.2-slim` OSS image and uses
+a small-instance profile with `GOMEMLIMIT=224MiB`,
+`GOGC=40`, one Go scheduler thread, bounded query concurrency and no alerting,
 Grafana Live, query history, public dashboards or legacy plugins. Tempo defaults
 to `GOMEMLIMIT=320MiB`, `GOGC=75`, and both services promptly release unused Go
 memory. `GOMEMLIMIT` is a soft Go runtime target rather than a hard container
@@ -63,7 +63,9 @@ kinds are registered consistently, limits the SQLite migration cache to 32 MiB
 instead of its 1 GB default, and uses the Parquet buffer to avoid SQLite lock
 contention. The ViaTrack dashboard is configured as the home dashboard and is
 provisioned inside the `ViaTrack` folder with the stable UID `viatrack`, so it is
-also available through Grafana's normal Dashboards browser.
+also available through Grafana's normal Dashboards browser. At startup, the
+entrypoint removes older `ViaTrack` folders only when they are empty; folders
+containing dashboards are never deleted by this cleanup.
 
 Prometheus scrapes Grafana once per minute over Railway's private network. Use
 `process_resident_memory_bytes{job="grafana"}` for the physical memory held by
@@ -115,8 +117,8 @@ This template is perfect for teams who need a comprehensive observability soluti
 | `GF_SECURITY_ADMIN_USER` | Username for the Grafana admin account | Required input |
 | `GF_SECURITY_ADMIN_PASSWORD` | Password for the Grafana admin account | Auto-generated secure string |
 | `GF_DEFAULT_INSTANCE_NAME` | Name of your Grafana instance | `Grafana on Railway` |
-| `GRAFANA_GOMEMLIMIT` | Soft Go runtime memory target for the dedicated Grafana process | `256MiB` |
-| `GRAFANA_GOGC` | Garbage collection frequency; lower values trade CPU for memory | `50` |
+| `GRAFANA_GOMEMLIMIT` | Soft Go runtime memory target for the dedicated Grafana process | `224MiB` |
+| `GRAFANA_GOGC` | Garbage collection frequency; lower values trade CPU for memory | `40` |
 | `GRAFANA_GOMAXPROCS` | Maximum Go scheduler threads for this low-traffic instance | `1` |
 
 ### Internal Service URLs
@@ -150,7 +152,7 @@ Grafana is pinned directly in `grafana/dockerfile` so a stale Railway variable
 cannot restore an unsupported image. Current versions:
 
 Examples:
-- Grafana: `13.2.1`
+- Grafana: `13.2-slim`
 - Loki: `VERSION=3.4.2`
 - Prometheus: `VERSION=v3.2.1`
 - Tempo: `VERSION=2.9.0`
