@@ -153,6 +153,8 @@ This template deploys four interconnected services:
 
 The Prometheus service reads additional scrape jobs from Railway variables at startup:
 
+The base scrape interval is 60 seconds, matching the ViaTrack dashboard refresh rate. Individual jobs can override it only when a different cadence is explicitly required.
+
 - `METRICS_SECRET`: bearer secret shared with monitored applications.
 - `PROMETHEUS_SCRAPE_CONFIGS`: a multiline YAML list of Prometheus jobs, without the top-level `scrape_configs` key.
 
