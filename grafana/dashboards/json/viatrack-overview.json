@@ -201,14 +201,14 @@
         {
           "datasource": { "type": "loki", "uid": "grafana_lokiq" },
           "editorMode": "code",
-          "expr": "{service=~\"(?i).*viatrack.*web.*\", event=\"http_request\"} | json",
+          "expr": "{event=\"http_request\"} | json",
           "queryType": "range",
           "refId": "A"
         },
         {
           "datasource": { "type": "loki", "uid": "grafana_lokiq" },
           "editorMode": "code",
-          "expr": "{service=~\"(?i).*viatrack.*api.*\", event=\"application_event\"} | json | event=\"auth_context\"",
+          "expr": "{event=\"application_event\"} | json | event=\"auth_context\"",
           "queryType": "range",
           "refId": "B"
         }
@@ -226,6 +226,6 @@
   "timezone": "browser",
   "title": "ViaTrack · Operación y API",
   "uid": "viatrack-overview",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }
