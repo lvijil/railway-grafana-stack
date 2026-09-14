@@ -4,7 +4,7 @@
 
 The `telemetry-gateway` directory provides a small authenticated public ingress for
 Loki pushes and OTLP/HTTP traces. Create one Railway service from this repository
-with root directory `/telemetry-gateway`, Dockerfile path `dockerfile`, and a public
+with root directory `/telemetry-gateway` and a public
 domain. Configure `OBSERVABILITY_INGEST_SECRET` (at least 32 characters), and share
 the same value only with the applications that send telemetry. The internal
 defaults expect Railway services named `loki` and `tempo`; override
