@@ -38,8 +38,6 @@ datasources:
     basicAuthUser:
     withCredentials:
     isDefault: false
-    jsonData:
-      timeInterval: 30s
   - name: Tempo
     type: tempo
     access: proxy
