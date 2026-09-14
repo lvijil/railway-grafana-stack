@@ -57,6 +57,12 @@ generic `GOMEMLIMIT`, `GOGC`, `GOMAXPROCS`, `GF_INSTALL_PLUGINS` or
 `GF_PLUGINS_PREINSTALL` variables in this service; the entrypoint intentionally
 ignores them.
 
+Grafana 12.4 automatically moves small installations to Unified Storage. This
+image explicitly enables the folder and dashboard migrations so both resource
+kinds are registered consistently, limits the SQLite migration cache to 32 MiB
+instead of its 1 GB default, and uses the Parquet buffer to avoid SQLite lock
+contention. These settings preserve dashboards provisioned from this repository.
+
 Prometheus scrapes Grafana once per minute over Railway's private network. Use
 `process_resident_memory_bytes{job="grafana"}` for the physical memory held by
 the Grafana process and `go_memstats_heap_alloc_bytes{job="grafana"}` for its Go
