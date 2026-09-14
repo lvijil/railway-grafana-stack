@@ -10,7 +10,7 @@ prune: false
 datasources:
   - name: Loki
     type: loki
-    access: direct
+    access: proxy
     orgId: 1
     uid: grafana_lokiq
     url: $LOKI_INTERNAL_URL
@@ -20,6 +20,12 @@ datasources:
     basicAuthUser:
     withCredentials:
     isDefault: true
+    jsonData:
+      derivedFields:
+        - datasourceUid: grafana_tempo
+          matcherRegex: '"trace_id":"([0-9a-f]{32})"'
+          name: TraceID
+          url: '$${__value.raw}'
   - name: Prometheus
     type: prometheus
     access: proxy
@@ -44,3 +50,6 @@ datasources:
     basicAuthUser:
     withCredentials:
     isDefault: false
+    jsonData:
+      serviceMap:
+        datasourceUid: grafana_prometheus

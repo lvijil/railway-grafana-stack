@@ -1,5 +1,45 @@
 # Grafana Stack on Railway
 
+## ViaTrack telemetry gateway
+
+The `telemetry-gateway` directory provides a small authenticated public ingress for
+Loki pushes and OTLP/HTTP traces. Create one Railway service from this repository
+with root directory `/telemetry-gateway`, Dockerfile path `dockerfile`, and a public
+domain. Configure `OBSERVABILITY_INGEST_SECRET` (at least 32 characters), and share
+the same value only with the applications that send telemetry. The internal
+defaults expect Railway services named `loki` and `tempo`; override
+`LOKI_PUSH_URL` or `TEMPO_OTLP_HTTP_URL` when those service names differ.
+
+Gateway variables:
+
+```text
+OBSERVABILITY_INGEST_SECRET=<shared random value, at least 32 characters>
+LOKI_PUSH_URL=http://loki.railway.internal:3100/loki/api/v1/push
+TEMPO_OTLP_HTTP_URL=http://tempo.railway.internal:4318/v1/traces
+```
+
+ViaTrack Web variables, using the gateway public domain:
+
+```text
+SERVICE_NAME=viatrack-web
+LOKI_PUSH_URL=https://<gateway-domain>/loki/api/v1/push
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://<gateway-domain>/v1/traces
+OBSERVABILITY_INGEST_SECRET=<same shared value>
+```
+
+ViaTrack API variables:
+
+```text
+SERVICE_NAME=viatrack-api
+LOKI_PUSH_URL=https://<gateway-domain>/loki/api/v1/push
+OBSERVABILITY_INGEST_SECRET=<same shared value>
+```
+
+Grafana reads Loki and Tempo through its server-side proxy. The provisioned ViaTrack
+dashboard includes recent correlated requests. Request, trace, tenant, and user IDs
+remain JSON fields or Loki structured metadata; they are intentionally not metric
+labels because their cardinality grows without bound.
+
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/8TLSQD?referralCode=IFlm92)
 
 ## What is this template
