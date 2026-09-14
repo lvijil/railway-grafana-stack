@@ -97,6 +97,39 @@ This template deploys four interconnected services:
 - Configured with sensible defaults for monitoring
 - Persistent volume for metrics data
 
+#### Dynamic scrape targets
+
+The Prometheus service reads additional scrape jobs from Railway variables at startup:
+
+- `METRICS_SECRET`: bearer secret shared with monitored applications.
+- `PROMETHEUS_SCRAPE_CONFIGS`: a multiline YAML list of Prometheus jobs, without the top-level `scrape_configs` key.
+
+Example:
+
+```yaml
+- job_name: viatrack-api
+  scheme: https
+  metrics_path: /api/metrics
+  authorization:
+    type: Bearer
+    credentials_file: /tmp/metrics-secret
+  static_configs:
+    - targets:
+        - viatrack.uviat.com
+
+- job_name: viatrack-web
+  scheme: https
+  metrics_path: /metrics
+  authorization:
+    type: Bearer
+    credentials_file: /tmp/metrics-secret
+  static_configs:
+    - targets:
+        - viatrack.uviat.com
+```
+
+The entrypoint indents the job list under `scrape_configs` and validates the generated configuration with `promtool` before starting Prometheus.
+
 ### Loki
 - Log aggregation system designed to be cost-effective
 - Horizontally scalable architecture
