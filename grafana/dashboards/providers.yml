@@ -4,7 +4,6 @@ providers:
   - name: ViaTrack
     orgId: 1
     folder: ViaTrack
-    folderUid: viatrack
     type: file
     disableDeletion: false
     editable: true

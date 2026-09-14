@@ -41,37 +41,11 @@ remain JSON fields or Loki structured metadata; they are intentionally not metri
 labels because their cardinality grows without bound.
 
 The ViaTrack dashboard refreshes once per minute and caps its log panel to reduce
-query pressure. Grafana is pinned to the supported `13.2-slim` OSS image and uses
-a small-instance profile with `GOMEMLIMIT=224MiB`,
-`GOGC=40`, one Go scheduler thread, bounded query concurrency and no alerting,
-Grafana Live, query history, public dashboards or legacy plugins. Tempo defaults
-to `GOMEMLIMIT=320MiB`, `GOGC=75`, and both services promptly release unused Go
-memory. `GOMEMLIMIT` is a soft Go runtime target rather than a hard container
-limit, so Railway can report more memory than this value. The image entrypoint
-removes the obsolete plugin variables inherited from the original template and
-applies the resource profile after Railway injects service variables.
-
-The profile can be tuned without editing the image through
-`GRAFANA_GOMEMLIMIT`, `GRAFANA_GOGC` and `GRAFANA_GOMAXPROCS`. Do not use the
-generic `GOMEMLIMIT`, `GOGC`, `GOMAXPROCS`, `GF_INSTALL_PLUGINS` or
-`GF_PLUGINS_PREINSTALL` variables in this service; the entrypoint intentionally
-ignores them.
-
-Grafana automatically moves folders and dashboards to Unified Storage. This
-image explicitly enables the folder and dashboard migrations so both resource
-kinds are registered consistently, limits the SQLite migration cache to 32 MiB
-instead of its 1 GB default, and uses the Parquet buffer to avoid SQLite lock
-contention. The ViaTrack dashboard is configured as the home dashboard and is
-provisioned inside the `ViaTrack` folder with the stable UID `viatrack`, so it is
-also available through Grafana's normal Dashboards browser. At startup, the
-entrypoint removes older `ViaTrack` folders only when they are empty; folders
-containing dashboards are never deleted by this cleanup.
-
-Prometheus scrapes Grafana once per minute over Railway's private network. Use
-`process_resident_memory_bytes{job="grafana"}` for the physical memory held by
-the Grafana process and `go_memstats_heap_alloc_bytes{job="grafana"}` for its Go
-heap. A large difference indicates memory outside the live heap or Linux page
-cache rather than retained dashboard data.
+query pressure. The Grafana and Tempo images default to `GOMEMLIMIT=320MiB`,
+`GOGC=75`, and prompt release of unused Go memory. Railway environment variables
+override these image defaults, so remove an existing `GOMEMLIMIT` when you want
+the repository profile to apply. Also remove the template's `GF_INSTALL_PLUGINS`
+value when those optional plugins are unused.
 
 Tempo uses only OTLP/HTTP, which is the protocol exposed by the telemetry gateway.
 Its small-instance profile limits search concurrency and live block size, disables
@@ -117,9 +91,7 @@ This template is perfect for teams who need a comprehensive observability soluti
 | `GF_SECURITY_ADMIN_USER` | Username for the Grafana admin account | Required input |
 | `GF_SECURITY_ADMIN_PASSWORD` | Password for the Grafana admin account | Auto-generated secure string |
 | `GF_DEFAULT_INSTANCE_NAME` | Name of your Grafana instance | `Grafana on Railway` |
-| `GRAFANA_GOMEMLIMIT` | Soft Go runtime memory target for the dedicated Grafana process | `224MiB` |
-| `GRAFANA_GOGC` | Garbage collection frequency; lower values trade CPU for memory | `40` |
-| `GRAFANA_GOMAXPROCS` | Maximum Go scheduler threads for this low-traffic instance | `1` |
+| `GF_INSTALL_PLUGINS` | Comma-separated list of Grafana plugins to install | `grafana-simple-json-datasource,grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel` |
 
 ### Internal Service URLs
 
@@ -142,17 +114,17 @@ Tempo also exposes a few variables to make it easier to push tracing information
 
 ### Version Control
 
-Loki, Prometheus and Tempo accept a `VERSION` build variable in Railway:
+Each service has its own `VERSION` environment variable that can be set independently in each service's settings in the Railway dashboard:
 
+- **Grafana Service**: Set `VERSION` to control the Grafana Docker image tag
 - **Loki Service**: Set `VERSION` to control the Loki Docker image tag
 - **Prometheus Service**: Set `VERSION` to control the Prometheus Docker image tag
 - **Tempo Service**: Set `VERSION` to control the Tempo Docker image tag
 
-Grafana is pinned directly in `grafana/dockerfile` so a stale Railway variable
-cannot restore an unsupported image. Current versions:
+By default, all services use the `latest` tag, but you can pin specific versions for stability:
 
 Examples:
-- Grafana: `13.2-slim`
+- Grafana: `VERSION=11.5.2`
 - Loki: `VERSION=3.4.2`
 - Prometheus: `VERSION=v3.2.1`
 - Tempo: `VERSION=2.9.0`
