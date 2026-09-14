@@ -175,7 +175,7 @@ Example:
 
 The entrypoint indents the job list under `scrape_configs` and validates the generated configuration with `promtool` before starting Prometheus.
 
-The Grafana image provisions the **ViaTrack · Operation and API** dashboard automatically. It includes availability, endpoint/method/status tables, throughput, HTTP responses, p95 latency, web proxy, database, authentication, email, cron, and current operational records.
+The Grafana image provisions the **ViaTrack · Operation and API** dashboard automatically. It includes availability, endpoint/method/status tables, throughput, HTTP responses, p95 HTTP and database latency, web proxy, authentication, email, cron, and current operational records.
 
 ### Loki
 - Log aggregation system designed to be cost-effective
