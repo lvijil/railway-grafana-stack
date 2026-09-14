@@ -218,7 +218,7 @@
       "type": "logs"
     }
   ],
-  "refresh": "1m",
+  "refresh": "30s",
   "schemaVersion": 40,
   "tags": ["viatrack", "prometheus", "operación"],
   "templating": { "list": [] },
@@ -227,6 +227,6 @@
   "timezone": "browser",
   "title": "ViaTrack · Operación y API",
   "uid": "viatrack-overview",
-  "version": 5,
+  "version": 6,
   "weekStart": ""
 }
