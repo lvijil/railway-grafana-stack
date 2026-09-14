@@ -41,7 +41,7 @@ remain JSON fields or Loki structured metadata; they are intentionally not metri
 labels because their cardinality grows without bound.
 
 The ViaTrack dashboard refreshes once per minute and caps its log panel to reduce
-query pressure. Grafana is pinned to the supported `12.4.10` OSS image and uses a
+query pressure. Grafana is pinned to the supported `13.2.1` OSS image and uses a
 small-instance profile with `GOMEMLIMIT=256MiB`,
 `GOGC=50`, one Go scheduler thread, bounded query concurrency and no alerting,
 Grafana Live, query history, public dashboards or legacy plugins. Tempo defaults
@@ -57,11 +57,13 @@ generic `GOMEMLIMIT`, `GOGC`, `GOMAXPROCS`, `GF_INSTALL_PLUGINS` or
 `GF_PLUGINS_PREINSTALL` variables in this service; the entrypoint intentionally
 ignores them.
 
-Grafana 12.4 automatically moves small installations to Unified Storage. This
+Grafana automatically moves folders and dashboards to Unified Storage. This
 image explicitly enables the folder and dashboard migrations so both resource
 kinds are registered consistently, limits the SQLite migration cache to 32 MiB
 instead of its 1 GB default, and uses the Parquet buffer to avoid SQLite lock
-contention. These settings preserve dashboards provisioned from this repository.
+contention. The ViaTrack dashboard is provisioned in `General` and configured as
+the home dashboard, so loading it does not depend on a separately persisted
+folder resource.
 
 Prometheus scrapes Grafana once per minute over Railway's private network. Use
 `process_resident_memory_bytes{job="grafana"}` for the physical memory held by
@@ -145,10 +147,10 @@ Loki, Prometheus and Tempo accept a `VERSION` build variable in Railway:
 - **Tempo Service**: Set `VERSION` to control the Tempo Docker image tag
 
 Grafana is pinned directly in `grafana/dockerfile` so a stale Railway variable
-cannot restore the unsupported 11.5 image. Current versions:
+cannot restore an unsupported image. Current versions:
 
 Examples:
-- Grafana: `12.4.10`
+- Grafana: `13.2.1`
 - Loki: `VERSION=3.4.2`
 - Prometheus: `VERSION=v3.2.1`
 - Tempo: `VERSION=2.9.0`

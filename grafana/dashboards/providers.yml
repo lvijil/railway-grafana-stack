@@ -3,7 +3,6 @@ apiVersion: 1
 providers:
   - name: ViaTrack
     orgId: 1
-    folder: ViaTrack
     type: file
     disableDeletion: false
     editable: true
@@ -11,3 +10,4 @@ providers:
     allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards/json
+      foldersFromFilesStructure: false
