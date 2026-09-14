@@ -1,16 +1,43 @@
-ARG VERSION=11.5.2
-
-FROM grafana/grafana-oss:${VERSION}
+FROM grafana/grafana:12.4.10
 
 ENV GF_ANALYTICS_REPORTING_ENABLED=false \
+    GF_ANALYTICS_ENABLED=false \
     GF_ANALYTICS_CHECK_FOR_UPDATES=false \
     GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES=false \
+    GF_ANALYTICS_FEEDBACK_LINKS_ENABLED=false \
     GF_UNIFIED_ALERTING_ENABLED=false \
+    GF_ALERTING_ENABLED=false \
+    GF_ALERTING_EXECUTE_ALERTS=false \
+    GF_EXPRESSIONS_ENABLED=false \
+    GF_LIVE_MAX_CONNECTIONS=0 \
+    GF_QUERY_HISTORY_ENABLED=false \
+    GF_RECORDED_QUERIES_ENABLED=false \
+    GF_NEWS_NEWS_FEED_ENABLED=false \
+    GF_PUBLIC_DASHBOARDS_ENABLED=false \
+    GF_REPORTING_ENABLED=false \
+    GF_SNAPSHOTS_EXTERNAL_ENABLED=false \
+    GF_PLUGINS_PLUGIN_ADMIN_ENABLED=false \
+    GF_PLUGINS_PREINSTALL_DISABLED=true \
+    GF_PLUGINS_PREINSTALL_AUTO_UPDATE=false \
+    GF_PLUGINS_DISABLE_PLUGINS=grafana-simple-json-datasource,grafana-piechart-panel,grafana-worldmap-panel,grafana-clock-panel \
+    GF_QUERY_CONCURRENT_QUERY_LIMIT=4 \
+    GF_DATASOURCES_CONCURRENT_QUERY_COUNT=4 \
+    GF_DATAPROXY_MAX_IDLE_CONNECTIONS=20 \
+    GF_DATAPROXY_ROW_LIMIT=100000 \
+    GF_DATABASE_MAX_IDLE_CONN=1 \
+    GF_DATABASE_MAX_OPEN_CONN=5 \
+    GF_DATABASE_WAL=true \
     GF_LOG_LEVEL=warn \
-    GOMEMLIMIT=320MiB \
-    GOGC=75 \
+    GRAFANA_GOMEMLIMIT=256MiB \
+    GRAFANA_GOGC=50 \
+    GRAFANA_GOMAXPROCS=1 \
     GODEBUG=madvdontneed=1
 
 # copy the datasources and dashboards
 COPY datasources /etc/grafana/provisioning/datasources
 COPY dashboards /etc/grafana/provisioning/dashboards
+COPY low-memory-entrypoint.sh /etc/grafana/low-memory-entrypoint.sh
+
+# Apply the dedicated ViaTrack profile after Railway injects service variables.
+# /run.sh is the entrypoint supplied by the official Grafana image.
+ENTRYPOINT ["/bin/sh", "/etc/grafana/low-memory-entrypoint.sh"]
