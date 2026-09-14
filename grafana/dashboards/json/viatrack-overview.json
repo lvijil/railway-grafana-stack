@@ -187,6 +187,7 @@
       "datasource": { "type": "loki", "uid": "grafana_lokiq" },
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 45 },
       "id": 17,
+      "maxDataPoints": 200,
       "options": {
         "dedupStrategy": "none",
         "enableLogDetails": true,
@@ -217,7 +218,7 @@
       "type": "logs"
     }
   ],
-  "refresh": "15s",
+  "refresh": "1m",
   "schemaVersion": 40,
   "tags": ["viatrack", "prometheus", "operación"],
   "templating": { "list": [] },
@@ -226,6 +227,6 @@
   "timezone": "browser",
   "title": "ViaTrack · Operación y API",
   "uid": "viatrack-overview",
-  "version": 4,
+  "version": 5,
   "weekStart": ""
 }

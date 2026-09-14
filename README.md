@@ -40,6 +40,11 @@ dashboard includes recent correlated requests. Request, trace, tenant, and user 
 remain JSON fields or Loki structured metadata; they are intentionally not metric
 labels because their cardinality grows without bound.
 
+The ViaTrack dashboard refreshes once per minute and caps its log panel to reduce
+query pressure. For a Grafana service limited to 512 MiB in Railway, set
+`GOMEMLIMIT=384MiB`; keep the value below the container memory limit. Remove the
+template's `GF_INSTALL_PLUGINS` value when those optional plugins are unused.
+
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/8TLSQD?referralCode=IFlm92)
 
 ## What is this template
