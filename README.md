@@ -35,6 +35,26 @@ LOKI_PUSH_URL=https://<gateway-domain>/loki/api/v1/push
 OBSERVABILITY_INGEST_SECRET=<same shared value>
 ```
 
+Faboni API variables:
+
+```text
+SERVICE_NAME=faboni-api
+METRICS_SECRET=<same value configured in Prometheus>
+LOKI_PUSH_URL=https://<gateway-domain>/loki/api/v1/push
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://<gateway-domain>/v1/traces
+OBSERVABILITY_INGEST_SECRET=<same shared value>
+```
+
+Faboni Web variables:
+
+```text
+SERVICE_NAME=faboni-web
+METRICS_SECRET=<same value configured in Prometheus and Faboni API>
+LOKI_PUSH_URL=https://<gateway-domain>/loki/api/v1/push
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=https://<gateway-domain>/v1/traces
+OBSERVABILITY_INGEST_SECRET=<same shared value>
+```
+
 Grafana reads Loki and Tempo through its server-side proxy. The provisioned ViaTrack
 dashboard includes recent correlated requests. Request, trace, tenant, and user IDs
 remain JSON fields or Loki structured metadata; they are intentionally not metric
@@ -178,11 +198,31 @@ Example:
   static_configs:
     - targets:
         - viatrack.uviat.com
+
+- job_name: faboni-api
+  scheme: https
+  metrics_path: /metrics
+  authorization:
+    type: Bearer
+    credentials_file: /tmp/metrics-secret
+  static_configs:
+    - targets:
+        - <faboni-api-domain>
+
+- job_name: faboni-web
+  scheme: https
+  metrics_path: /metrics
+  authorization:
+    type: Bearer
+    credentials_file: /tmp/metrics-secret
+  static_configs:
+    - targets:
+        - <faboni-web-domain>
 ```
 
 The entrypoint indents the job list under `scrape_configs` and validates the generated configuration with `promtool` before starting Prometheus.
 
-The Grafana image provisions the **ViaTrack · Operation and API** dashboard automatically. It includes availability, endpoint/method/status tables, throughput, HTTP responses, p95 HTTP and database latency, web proxy, authentication, email, cron, and current operational records.
+The Grafana image provisions the **ViaTrack · Operation and API** and **Faboni · Operación y API** dashboards automatically under the `Uviat` folder. The Faboni dashboard combines API and web availability, proxy traffic, latency and Node.js resources with correlated Loki logs and Tempo traces.
 
 ### Loki
 - Log aggregation system designed to be cost-effective
