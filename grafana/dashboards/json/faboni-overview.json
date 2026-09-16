@@ -73,7 +73,7 @@
       "gridPos": {"h": 9, "w": 24, "x": 0, "y": 4},
       "id": 7,
       "options": {"cellHeight": "sm", "footer": {"countRows": false, "enablePagination": true, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true, "sortBy": [{"desc": true, "displayName": "Value"}]},
-      "targets": [{"editorMode": "code", "expr": "sum by (method, path, status) (increase(faboni_http_requests_total[$__range]))", "format": "table", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A"}],
+      "targets": [{"editorMode": "code", "expr": "sum by (method, route, status_code) (increase(faboni_web_proxy_requests_total[$__range]))", "format": "table", "instant": true, "legendFormat": "__auto", "range": false, "refId": "A"}],
       "title": "Endpoints llamados en el rango seleccionado",
       "type": "table"
     },
@@ -83,7 +83,7 @@
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 13},
       "id": 8,
       "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"hideZeros": false, "mode": "multi", "sort": "desc"}},
-      "targets": [{"editorMode": "code", "expr": "sum by (method, path) (rate(faboni_http_requests_total[$__rate_interval]))", "legendFormat": "{{method}} {{path}}", "range": true, "refId": "A"}],
+      "targets": [{"editorMode": "code", "expr": "sum by (method, route) (rate(faboni_web_proxy_requests_total[$__rate_interval]))", "legendFormat": "{{method}} {{route}}", "range": true, "refId": "A"}],
       "title": "Tráfico API por endpoint",
       "type": "timeseries"
     },
@@ -93,7 +93,7 @@
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 13},
       "id": 9,
       "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"hideZeros": false, "mode": "multi", "sort": "desc"}},
-      "targets": [{"editorMode": "code", "expr": "sum by (status) (rate(faboni_http_requests_total[$__rate_interval]))", "legendFormat": "HTTP {{status}}", "range": true, "refId": "A"}],
+      "targets": [{"editorMode": "code", "expr": "sum by (status_code) (rate(faboni_web_proxy_requests_total[$__rate_interval]))", "legendFormat": "HTTP {{status_code}}", "range": true, "refId": "A"}],
       "title": "Respuestas por código HTTP",
       "type": "timeseries"
     },
@@ -103,18 +103,18 @@
       "gridPos": {"h": 8, "w": 12, "x": 0, "y": 21},
       "id": 10,
       "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"hideZeros": false, "mode": "multi", "sort": "desc"}},
-      "targets": [{"editorMode": "code", "expr": "histogram_quantile(0.95, sum by (le, path) (rate(faboni_http_request_duration_seconds_bucket[$__rate_interval])))", "legendFormat": "{{path}}", "range": true, "refId": "A"}],
+      "targets": [{"editorMode": "code", "expr": "histogram_quantile(0.95, sum by (le, route) (rate(faboni_web_proxy_request_duration_seconds_bucket[$__rate_interval])))", "legendFormat": "{{route}}", "range": true, "refId": "A"}],
       "title": "Latencia p95 por endpoint",
       "type": "timeseries"
     },
     {
       "datasource": {"type": "prometheus", "uid": "grafana_prometheus"},
-      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 20, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "short"}, "overrides": []},
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisBorderShow": false, "axisCenteredZero": false, "axisColorMode": "text", "axisLabel": "", "axisPlacement": "auto", "barAlignment": 0, "drawStyle": "line", "fillOpacity": 20, "gradientMode": "none", "hideFrom": {"legend": false, "tooltip": false, "viz": false}, "insertNulls": false, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "scaleDistribution": {"type": "linear"}, "showPoints": "never", "spanNulls": false, "stacking": {"group": "A", "mode": "none"}, "thresholdsStyle": {"mode": "off"}}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}, "unit": "reqps"}, "overrides": []},
       "gridPos": {"h": 8, "w": 12, "x": 12, "y": 21},
       "id": 11,
       "options": {"legend": {"calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"hideZeros": false, "mode": "multi", "sort": "desc"}},
-      "targets": [{"editorMode": "code", "expr": "sum by (method) (faboni_http_requests_in_flight)", "legendFormat": "{{method}}", "range": true, "refId": "A"}],
-      "title": "Concurrencia por método",
+      "targets": [{"editorMode": "code", "expr": "sum by (outcome, status_code) (rate(faboni_web_proxy_requests_total[$__rate_interval]))", "legendFormat": "{{outcome}} · HTTP {{status_code}}", "range": true, "refId": "A"}],
+      "title": "Resultado del proxy Web → API",
       "type": "timeseries"
     },
     {
@@ -171,10 +171,11 @@
       "datasource": {"type": "tempo", "uid": "grafana_tempo"},
       "gridPos": {"h": 10, "w": 24, "x": 0, "y": 57},
       "id": 15,
-      "options": {},
+      "fieldConfig": {"defaults": {"custom": {"align": "auto", "cellOptions": {"type": "auto"}, "inspect": false}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
+      "options": {"cellHeight": "sm", "footer": {"countRows": false, "enablePagination": true, "fields": "", "reducer": ["sum"], "show": false}, "showHeader": true},
       "targets": [{"datasource": {"type": "tempo", "uid": "grafana_tempo"}, "limit": 50, "query": "{ resource.service.name = \"faboni-api\" }", "queryType": "traceql", "refId": "A", "tableType": "traces"}, {"datasource": {"type": "tempo", "uid": "grafana_tempo"}, "limit": 50, "query": "{ resource.service.name = \"faboni-web\" }", "queryType": "traceql", "refId": "B", "tableType": "traces"}],
       "title": "Trazas recientes de Faboni",
-      "type": "traces"
+      "type": "table"
     }
   ],
   "refresh": "30s",
@@ -186,6 +187,6 @@
   "timezone": "browser",
   "title": "Faboni · Operación y API",
   "uid": "faboni-overview",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
