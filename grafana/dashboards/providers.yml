@@ -6,8 +6,8 @@ providers:
     folder: Uviat
     type: file
     disableDeletion: false
-    editable: true
-    updateIntervalSeconds: 300
-    allowUiUpdates: true
+    editable: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: false
     options:
       path: /etc/grafana/provisioning/dashboards/json

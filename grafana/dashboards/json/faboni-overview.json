@@ -12,6 +12,7 @@
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "mappings": [], "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}, {"color": "green", "value": 1}]}, "unit": "percentunit"}, "overrides": []},
       "gridPos": {"h": 4, "w": 4, "x": 0, "y": 0},
       "id": 1,
+      "description": "Estado del target de métricas del backend. Un valor 0 indica que Prometheus no puede leer /api/metrics; no implica que el portal esté caído.",
       "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showPercentChange": false, "textMode": "auto", "wideLayout": true},
       "targets": [{"editorMode": "code", "expr": "max(up{job=\"faboni-api\"})", "instant": true, "legendFormat": "API", "range": false, "refId": "A"}],
       "title": "Disponibilidad API",
@@ -23,7 +24,7 @@
       "gridPos": {"h": 4, "w": 4, "x": 4, "y": 0},
       "id": 2,
       "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showPercentChange": false, "textMode": "auto", "wideLayout": true},
-      "targets": [{"editorMode": "code", "expr": "sum(increase(faboni_http_requests_total[24h]))", "instant": true, "legendFormat": "Requests", "range": false, "refId": "A"}],
+      "targets": [{"editorMode": "code", "expr": "sum(increase(faboni_http_requests_total[24h])) or sum(increase(faboni_web_proxy_requests_total[24h]))", "instant": true, "legendFormat": "Requests", "range": false, "refId": "A"}],
       "title": "Solicitudes API · 24 h",
       "type": "stat"
     },
@@ -33,7 +34,7 @@
       "gridPos": {"h": 4, "w": 4, "x": 8, "y": 0},
       "id": 3,
       "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showPercentChange": false, "textMode": "auto", "wideLayout": true},
-      "targets": [{"editorMode": "code", "expr": "sum(increase(faboni_http_requests_total{status=~\"5..\"}[24h]))", "instant": true, "legendFormat": "HTTP 5xx", "range": false, "refId": "A"}],
+      "targets": [{"editorMode": "code", "expr": "sum(increase(faboni_http_requests_total{status=~\"5..\"}[24h])) or sum(increase(faboni_web_proxy_requests_total{status_code=~\"5..\"}[24h])) or vector(0)", "instant": true, "legendFormat": "HTTP 5xx", "range": false, "refId": "A"}],
       "title": "Errores API · 24 h",
       "type": "stat"
     },
@@ -43,7 +44,7 @@
       "gridPos": {"h": 4, "w": 4, "x": 12, "y": 0},
       "id": 4,
       "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "showPercentChange": false, "textMode": "auto", "wideLayout": true},
-      "targets": [{"editorMode": "code", "expr": "histogram_quantile(0.95, sum by (le) (rate(faboni_http_request_duration_seconds_bucket[$__rate_interval])))", "instant": true, "legendFormat": "p95", "range": false, "refId": "A"}],
+      "targets": [{"editorMode": "code", "expr": "histogram_quantile(0.95, sum by (le) (rate(faboni_http_request_duration_seconds_bucket[$__rate_interval]))) or histogram_quantile(0.95, sum by (le) (rate(faboni_web_proxy_request_duration_seconds_bucket[$__rate_interval])))", "instant": true, "legendFormat": "p95", "range": false, "refId": "A"}],
       "title": "Latencia API p95",
       "type": "stat"
     },
@@ -187,6 +188,6 @@
   "timezone": "browser",
   "title": "Faboni · Operación y API",
   "uid": "faboni-overview",
-  "version": 2,
+  "version": 130,
   "weekStart": ""
 }
