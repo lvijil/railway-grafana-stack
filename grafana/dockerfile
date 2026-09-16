@@ -31,6 +31,7 @@ ENV GF_ANALYTICS_REPORTING_ENABLED=false \
 # copy the datasources and dashboards
 COPY datasources /etc/grafana/provisioning/datasources
 COPY dashboards /etc/grafana/provisioning/dashboards
+RUN grep -q 'faboni-operations-v130' /etc/grafana/provisioning/dashboards/json/faboni-operations-v130.json
 COPY low-memory-entrypoint.sh /etc/grafana/low-memory-entrypoint.sh
 
 ENTRYPOINT ["/bin/sh", "/etc/grafana/low-memory-entrypoint.sh"]
