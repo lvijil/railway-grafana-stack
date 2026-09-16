@@ -175,6 +175,7 @@ The Prometheus service reads additional scrape jobs from Railway variables at st
 
 - `METRICS_SECRET`: bearer secret shared with monitored applications.
 - `PROMETHEUS_SCRAPE_CONFIGS`: a multiline YAML list of Prometheus jobs, without the top-level `scrape_configs` key.
+- `FABONI_METRICS_TARGET`: public Faboni host used by the automatically appended API and web jobs. Defaults to `faboni.uviat.com`.
 
 Example:
 
@@ -201,13 +202,13 @@ Example:
 
 - job_name: faboni-api
   scheme: https
-  metrics_path: /metrics
+  metrics_path: /api/metrics
   authorization:
     type: Bearer
     credentials_file: /tmp/metrics-secret
   static_configs:
     - targets:
-        - <faboni-api-domain>
+        - faboni.uviat.com
 
 - job_name: faboni-web
   scheme: https
@@ -217,10 +218,10 @@ Example:
     credentials_file: /tmp/metrics-secret
   static_configs:
     - targets:
-        - <faboni-web-domain>
+        - faboni.uviat.com
 ```
 
-The entrypoint indents the job list under `scrape_configs` and validates the generated configuration with `promtool` before starting Prometheus.
+The entrypoint automatically appends the `faboni-api` and `faboni-web` jobs when they are not already present in `PROMETHEUS_SCRAPE_CONFIGS`, indents the complete job list under `scrape_configs`, and validates the generated configuration with `promtool` before starting Prometheus.
 
 The Grafana image provisions the **ViaTrack · Operation and API** and **Faboni · Operación y API** dashboards automatically under the `Uviat` folder. The Faboni dashboard combines API and web availability, proxy traffic, latency and Node.js resources with correlated Loki logs and Tempo traces.
 
