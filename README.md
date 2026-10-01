@@ -52,9 +52,10 @@ Set `TELEMETRY_ENABLED=true` and redeploy Grafana whenever you need to inspect t
 
 Set `TELEMETRY_ENABLED=false` in Prometheus as well. It starts with no scrape targets,
 so it does not load its TSDB or poll API and Web services. It instead serves a tiny
-status page using BusyBox; existing metrics remain untouched on the volume. Set the
-variable to `true` and redeploy Prometheus whenever metrics are needed, then provide
-`METRICS_SECRET` plus `PROMETHEUS_SCRAPE_CONFIGS` as usual.
+status page using BusyBox; `/metrics`, `/-/ready`, `/-/healthy` and `/health` still
+respond successfully for Railway health checks, and existing metrics remain untouched
+on the volume. Set the variable to `true` and redeploy Prometheus whenever metrics
+are needed, then provide `METRICS_SECRET` plus `PROMETHEUS_SCRAPE_CONFIGS` as usual.
 
 Faboni API variables:
 

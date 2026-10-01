@@ -12,7 +12,9 @@ if [ "$telemetry_enabled" != "true" ]; then
 <!doctype html><html lang="es"><meta charset="utf-8"><title>Telemetría apagada</title><body><h1>Telemetría apagada</h1><p>Establece TELEMETRY_ENABLED=true y redespliega Prometheus para consultar métricas.</p></body></html>
 EOF
   printf 'ready\n' > "$idle_root/-/ready"
+  printf 'healthy\n' > "$idle_root/-/healthy"
   printf 'disabled\n' > "$idle_root/health"
+  printf '# telemetry disabled\n' > "$idle_root/metrics"
   exec busybox httpd -f -p "${PORT:-9090}" -h "$idle_root"
 fi
 
