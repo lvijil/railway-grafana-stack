@@ -4,26 +4,16 @@ set -eu
 telemetry_enabled="${TELEMETRY_ENABLED:-false}"
 
 if [ "$telemetry_enabled" != "true" ]; then
-  # No scrape targets and a small Go heap while observability is idle. This
-  # keeps the service available for Grafana without polling applications.
-  export GOMEMLIMIT="${PROMETHEUS_IDLE_GOMEMLIMIT:-96MiB}"
-  export GOGC="${PROMETHEUS_IDLE_GOGC:-25}"
-  export GOMAXPROCS="${PROMETHEUS_GOMAXPROCS:-1}"
-
-  cat > /tmp/prometheus.yml <<'EOF'
-global:
-  scrape_interval: 5m
-
-scrape_configs: []
+  # Prometheus loads its TSDB and keeps a substantial base RSS even without
+  # targets. Do not start it while telemetry is intentionally disabled.
+  idle_root=/tmp/prometheus-idle
+  mkdir -p "$idle_root/-"
+  cat > "$idle_root/index.html" <<'EOF'
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Telemetría apagada</title><body><h1>Telemetría apagada</h1><p>Establece TELEMETRY_ENABLED=true y redespliega Prometheus para consultar métricas.</p></body></html>
 EOF
-
-  /bin/promtool check config /tmp/prometheus.yml
-  exec /bin/prometheus \
-    --config.file=/tmp/prometheus.yml \
-    --storage.tsdb.path=/prometheus \
-    --query.max-concurrency=1 \
-    --query.max-samples=50000 \
-    --web.max-connections=5
+  printf 'ready\n' > "$idle_root/-/ready"
+  printf 'disabled\n' > "$idle_root/health"
+  exec busybox httpd -f -p "${PORT:-9090}" -h "$idle_root"
 fi
 
 : "${METRICS_SECRET:?METRICS_SECRET is required when TELEMETRY_ENABLED=true}"

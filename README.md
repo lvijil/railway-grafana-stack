@@ -51,10 +51,10 @@ BusyBox status server instead of Grafana while disabled. The public root and
 Set `TELEMETRY_ENABLED=true` and redeploy Grafana whenever you need to inspect them.
 
 Set `TELEMETRY_ENABLED=false` in Prometheus as well. It starts with no scrape targets,
-so it does not poll API or Web services, and uses the idle profile: `96MiB` heap target,
-one query at a time, at most 50,000 samples per query and five HTTP connections. This
-profile preserves existing data on the volume. When diagnosing, set the variable to
-`true` and provide `METRICS_SECRET` plus `PROMETHEUS_SCRAPE_CONFIGS` as usual.
+so it does not load its TSDB or poll API and Web services. It instead serves a tiny
+status page using BusyBox; existing metrics remain untouched on the volume. Set the
+variable to `true` and redeploy Prometheus whenever metrics are needed, then provide
+`METRICS_SECRET` plus `PROMETHEUS_SCRAPE_CONFIGS` as usual.
 
 Faboni API variables:
 
