@@ -43,6 +43,13 @@ the diagnostic period, then redeploy the gateway. The applications should also k
 their own `TELEMETRY_ENABLED=false` setting while telemetry is off, which prevents
 the requests from being sent in the first place.
 
+Use the same `TELEMETRY_INGEST_ENABLED=false` value in the Grafana service. Its
+entrypoint then uses the idle profile: `128MiB` heap target, lower GC threshold, one
+concurrent query and two idle proxy connections. Override only `GRAFANA_IDLE_GOMEMLIMIT`
+or `GRAFANA_IDLE_GOGC` when the dashboard needs more capacity. This reduces Grafana's
+own baseline but does not stop the Grafana, Loki or Tempo containers; pause those
+Railway services when the dashboard itself is not needed.
+
 Faboni API variables:
 
 ```text
