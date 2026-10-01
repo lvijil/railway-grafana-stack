@@ -44,12 +44,11 @@ their own `TELEMETRY_ENABLED=false` setting while telemetry is off, which preven
 the requests from being sent in the first place. `TELEMETRY_INGEST_ENABLED` remains
 supported only as a compatibility alias for existing gateway and Grafana services.
 
-Use the same `TELEMETRY_ENABLED=false` value in the Grafana service. Its
-entrypoint then uses the idle profile: `128MiB` heap target, lower GC threshold, one
-concurrent query and two idle proxy connections. Override only `GRAFANA_IDLE_GOMEMLIMIT`
-or `GRAFANA_IDLE_GOGC` when the dashboard needs more capacity. This reduces Grafana's
-own baseline but does not stop the Grafana, Loki or Tempo containers; pause those
-Railway services when the dashboard itself is not needed.
+Use the same `TELEMETRY_ENABLED=false` value in the Grafana service. Grafana has a
+substantial base RSS even with no data being ingested, so its entrypoint starts a tiny
+BusyBox status server instead of Grafana while disabled. The public root and
+`/health` report that telemetry is off; dashboards are deliberately unavailable.
+Set `TELEMETRY_ENABLED=true` and redeploy Grafana whenever you need to inspect them.
 
 Set `TELEMETRY_ENABLED=false` in Prometheus as well. It starts with no scrape targets,
 so it does not poll API or Web services, and uses the idle profile: `96MiB` heap target,
