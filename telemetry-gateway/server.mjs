@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 
 const port = Number.parseInt(process.env.PORT ?? "8080", 10);
 const ingestSecret = process.env.OBSERVABILITY_INGEST_SECRET ?? "";
+const telemetryIngestEnabled = process.env.TELEMETRY_INGEST_ENABLED === "true";
 const maxBodyBytes = Number.parseInt(process.env.MAX_BODY_BYTES ?? "5242880", 10);
 const routes = new Map([
   ["/loki/api/v1/push", process.env.LOKI_PUSH_URL ?? "http://loki.railway.internal:3100/loki/api/v1/push"],
@@ -61,12 +62,20 @@ const server = createServer(async (request, response) => {
   const requestUrl = new URL(request.url ?? "/", "http://telemetry-gateway");
 
   if (request.method === "GET" && requestUrl.pathname === "/health") {
-    return writeJson(response, 200, { status: "ok" });
+    return writeJson(response, 200, { status: telemetryIngestEnabled ? "ok" : "disabled", telemetryIngestEnabled });
   }
 
   const target = routes.get(requestUrl.pathname);
   if (request.method !== "POST" || !target) {
     return writeJson(response, 404, { error: "not_found" });
+  }
+
+  // Drop telemetry before authenticating, buffering or forwarding its body. A
+  // successful no-content response prevents disabled clients from retrying.
+  if (!telemetryIngestEnabled) {
+    response.writeHead(204);
+    response.end();
+    return;
   }
 
   if (!hasValidBearer(request)) {
@@ -124,5 +133,6 @@ server.listen(port, "::", () => {
     level: "info",
     event: "telemetry_gateway_started",
     port,
+    telemetryIngestEnabled,
   }));
 });

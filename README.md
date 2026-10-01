@@ -14,6 +14,7 @@ Gateway variables:
 
 ```text
 OBSERVABILITY_INGEST_SECRET=<shared random value, at least 32 characters>
+TELEMETRY_INGEST_ENABLED=false
 LOKI_PUSH_URL=http://loki.railway.internal:3100/loki/api/v1/push
 TEMPO_OTLP_HTTP_URL=http://tempo.railway.internal:4318/v1/traces
 ```
@@ -34,6 +35,13 @@ SERVICE_NAME=viatrack-api
 LOKI_PUSH_URL=https://<gateway-domain>/loki/api/v1/push
 OBSERVABILITY_INGEST_SECRET=<same shared value>
 ```
+
+`TELEMETRY_INGEST_ENABLED` defaults to `false`. While disabled, the gateway returns
+`204 No Content` for Loki and OTLP ingest requests before reading their payload or
+contacting Loki/Tempo, and `/health` reports `disabled`. Set it to `true` only for
+the diagnostic period, then redeploy the gateway. The applications should also keep
+their own `TELEMETRY_ENABLED=false` setting while telemetry is off, which prevents
+the requests from being sent in the first place.
 
 Faboni API variables:
 
