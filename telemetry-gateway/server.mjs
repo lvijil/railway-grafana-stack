@@ -3,7 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 
 const port = Number.parseInt(process.env.PORT ?? "8080", 10);
 const ingestSecret = process.env.OBSERVABILITY_INGEST_SECRET ?? "";
-const telemetryIngestEnabled = process.env.TELEMETRY_INGEST_ENABLED === "true";
+const telemetryIngestEnabled = process.env.TELEMETRY_ENABLED === "true" || process.env.TELEMETRY_INGEST_ENABLED === "true";
 const maxBodyBytes = Number.parseInt(process.env.MAX_BODY_BYTES ?? "5242880", 10);
 const routes = new Map([
   ["/loki/api/v1/push", process.env.LOKI_PUSH_URL ?? "http://loki.railway.internal:3100/loki/api/v1/push"],

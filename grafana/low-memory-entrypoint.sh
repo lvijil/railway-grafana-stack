@@ -3,7 +3,9 @@ set -eu
 
 # Railway variables override Docker ENV values. Apply the ViaTrack profile at
 # process startup so an old template value cannot restore the large defaults.
-if [ "${TELEMETRY_INGEST_ENABLED:-false}" = "true" ]; then
+telemetry_enabled="${TELEMETRY_ENABLED:-${TELEMETRY_INGEST_ENABLED:-false}}"
+
+if [ "$telemetry_enabled" = "true" ]; then
   export GOMEMLIMIT="${GRAFANA_GOMEMLIMIT:-256MiB}"
   export GOGC="${GRAFANA_GOGC:-50}"
 else

@@ -1,9 +1,38 @@
 #!/bin/sh
 set -eu
 
-: "${METRICS_SECRET:?METRICS_SECRET is required}"
-: "${PROMETHEUS_SCRAPE_CONFIGS:?PROMETHEUS_SCRAPE_CONFIGS is required}"
+telemetry_enabled="${TELEMETRY_ENABLED:-false}"
+
+if [ "$telemetry_enabled" != "true" ]; then
+  # No scrape targets and a small Go heap while observability is idle. This
+  # keeps the service available for Grafana without polling applications.
+  export GOMEMLIMIT="${PROMETHEUS_IDLE_GOMEMLIMIT:-96MiB}"
+  export GOGC="${PROMETHEUS_IDLE_GOGC:-25}"
+  export GOMAXPROCS="${PROMETHEUS_GOMAXPROCS:-1}"
+
+  cat > /tmp/prometheus.yml <<'EOF'
+global:
+  scrape_interval: 5m
+
+scrape_configs: []
+EOF
+
+  /bin/promtool check config /tmp/prometheus.yml
+  exec /bin/prometheus \
+    --config.file=/tmp/prometheus.yml \
+    --storage.tsdb.path=/prometheus \
+    --query.max-concurrency=1 \
+    --query.max-samples=50000 \
+    --web.max-connections=5
+fi
+
+: "${METRICS_SECRET:?METRICS_SECRET is required when TELEMETRY_ENABLED=true}"
+: "${PROMETHEUS_SCRAPE_CONFIGS:?PROMETHEUS_SCRAPE_CONFIGS is required when TELEMETRY_ENABLED=true}"
 : "${FABONI_METRICS_TARGET:=faboni.uviat.com}"
+
+export GOMEMLIMIT="${PROMETHEUS_GOMEMLIMIT:-256MiB}"
+export GOGC="${PROMETHEUS_GOGC:-50}"
+export GOMAXPROCS="${PROMETHEUS_GOMAXPROCS:-1}"
 
 printf '%s' "$METRICS_SECRET" > /tmp/metrics-secret
 chmod 600 /tmp/metrics-secret
@@ -48,4 +77,6 @@ sed 's/^/  /' /tmp/scrape-configs.yml >> /tmp/prometheus.yml
 
 exec /bin/prometheus \
   --config.file=/tmp/prometheus.yml \
-  --storage.tsdb.path=/prometheus
+  --storage.tsdb.path=/prometheus \
+  --query.max-concurrency="${PROMETHEUS_QUERY_MAX_CONCURRENCY:-4}" \
+  --query.max-samples="${PROMETHEUS_QUERY_MAX_SAMPLES:-500000}"

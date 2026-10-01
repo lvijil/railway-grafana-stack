@@ -14,7 +14,7 @@ Gateway variables:
 
 ```text
 OBSERVABILITY_INGEST_SECRET=<shared random value, at least 32 characters>
-TELEMETRY_INGEST_ENABLED=false
+TELEMETRY_ENABLED=false
 LOKI_PUSH_URL=http://loki.railway.internal:3100/loki/api/v1/push
 TEMPO_OTLP_HTTP_URL=http://tempo.railway.internal:4318/v1/traces
 ```
@@ -36,19 +36,26 @@ LOKI_PUSH_URL=https://<gateway-domain>/loki/api/v1/push
 OBSERVABILITY_INGEST_SECRET=<same shared value>
 ```
 
-`TELEMETRY_INGEST_ENABLED` defaults to `false`. While disabled, the gateway returns
+`TELEMETRY_ENABLED` defaults to `false`. While disabled, the gateway returns
 `204 No Content` for Loki and OTLP ingest requests before reading their payload or
 contacting Loki/Tempo, and `/health` reports `disabled`. Set it to `true` only for
 the diagnostic period, then redeploy the gateway. The applications should also keep
 their own `TELEMETRY_ENABLED=false` setting while telemetry is off, which prevents
-the requests from being sent in the first place.
+the requests from being sent in the first place. `TELEMETRY_INGEST_ENABLED` remains
+supported only as a compatibility alias for existing gateway and Grafana services.
 
-Use the same `TELEMETRY_INGEST_ENABLED=false` value in the Grafana service. Its
+Use the same `TELEMETRY_ENABLED=false` value in the Grafana service. Its
 entrypoint then uses the idle profile: `128MiB` heap target, lower GC threshold, one
 concurrent query and two idle proxy connections. Override only `GRAFANA_IDLE_GOMEMLIMIT`
 or `GRAFANA_IDLE_GOGC` when the dashboard needs more capacity. This reduces Grafana's
 own baseline but does not stop the Grafana, Loki or Tempo containers; pause those
 Railway services when the dashboard itself is not needed.
+
+Set `TELEMETRY_ENABLED=false` in Prometheus as well. It starts with no scrape targets,
+so it does not poll API or Web services, and uses the idle profile: `96MiB` heap target,
+one query at a time, at most 50,000 samples per query and five HTTP connections. This
+profile preserves existing data on the volume. When diagnosing, set the variable to
+`true` and provide `METRICS_SECRET` plus `PROMETHEUS_SCRAPE_CONFIGS` as usual.
 
 Faboni API variables:
 
